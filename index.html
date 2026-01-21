@@ -33,6 +33,42 @@
   <link rel="manifest" href="manifest.json">
   <!-- Подключаем скрипт Telegram Web App -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    // Блокируем системную кнопку "назад" в PWA
+    window.addEventListener('popstate', function(event) {
+      // Предотвращаем закрытие PWA при нажатии кнопки "назад"
+      if (window.history.length <= 1) {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+      }
+    });
+
+    // Дополнительная защита: перехватываем back button через history API
+    (function() {
+      var initialPush = false;
+      if (!window.history.state) {
+        window.history.pushState({ page: 'main' }, '');
+        initialPush = true;
+      }
+
+      window.addEventListener('popstate', function(event) {
+        if (window.history.state && window.history.state.page === 'main') {
+          // Если пытаемся вернуться на главную, не закрываем приложение
+          window.history.pushState({ page: 'main' }, '');
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      });
+
+      // Если это первый заход, отправляем событие Flutter
+      if (initialPush) {
+        window.addEventListener('flutter-first-frame', function() {
+          // Flutter готов, можно работать с историей
+        });
+      }
+    })();
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
