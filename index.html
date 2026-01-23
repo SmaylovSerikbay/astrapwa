@@ -50,22 +50,55 @@
   <script>
     // Функция для шаринга через Telegram WebApp SDK
     function telegramShare(url, text) {
-      // Этот метод открывает нативное окно пересылки Telegram
+      // Проверяем наличие Telegram WebApp
       if (window.Telegram && window.Telegram.WebApp) {
-        const fullUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
-        window.Telegram.WebApp.openTelegramLink(fullUrl);
-      } else {
-        // Если открыто не в телеге, пробуем системное меню
-        if (navigator.share) {
-          navigator.share({ title: 'Astra Taxi', text: text, url: url }).catch(function(error) {
-            console.log('Ошибка при шаринге:', error);
-          });
-        } else {
+        // Используем метод shareToChat для отправки нового сообщения в выбранный чат
+        // Это открывает список чатов для выбора, куда отправить сообщение (не пересылка!)
+        try {
+          // Формируем полное сообщение с текстом и ссылкой
+          const fullMessage = text + '\n' + url;
+          
+          // Пробуем использовать shareToChat (если доступен)
+          if (typeof window.Telegram.WebApp.shareToChat === 'function') {
+            window.Telegram.WebApp.shareToChat({
+              text: fullMessage
+            });
+            return;
+          }
+        } catch (e) {
+          console.log('Ошибка при вызове shareToChat:', e);
+        }
+        
+        // Альтернативный способ: используем openTelegramLink с правильным форматом
+        // Формируем URL для отправки нового сообщения (не пересылки)
+        try {
+          // Используем формат, который открывает диалог выбора чата для отправки нового сообщения
+          // Вместо share/url используем прямой формат с ботом
+          const botUsername = 'astrataxi_bot'; // Имя бота из конфига
+          const messageText = encodeURIComponent(text + '\n' + url);
+          // Формат для отправки нового сообщения через бота
+          const shareUrl = `https://t.me/${botUsername}?text=${messageText}`;
+          window.Telegram.WebApp.openTelegramLink(shareUrl);
+          return;
+        } catch (e) {
+          console.log('Ошибка при вызове openTelegramLink:', e);
+        }
+      }
+      
+      // Если открыто не в телеге, пробуем системное меню
+      if (navigator.share) {
+        navigator.share({ title: 'Astra Taxi', text: text, url: url }).catch(function(error) {
+          console.log('Ошибка при шаринге:', error);
           // Fallback: копируем в буфер обмена
           navigator.clipboard.writeText(text + '\n' + url).then(function() {
             console.log('Скопировано в буфер обмена');
           });
-        }
+        });
+      } else {
+        // Fallback: копируем в буфер обмена
+        navigator.clipboard.writeText(text + '\n' + url).then(function() {
+          console.log('Скопировано в буфер обмена');
+        });
       }
     }
 
