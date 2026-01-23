@@ -68,6 +68,26 @@
         });
       }
     })();
+
+    // Обработка deep links для шаринга поездок
+    window.addEventListener('load', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const rideId = urlParams.get('ride');
+      const path = window.location.pathname;
+      
+      // Обработка /share/:id или ?ride=:id
+      if (rideId) {
+        // Сохраняем ID поездки для использования после загрузки приложения
+        localStorage.setItem('pending_ride_id', rideId);
+        // Обновляем URL для чистоты
+        window.history.replaceState({}, '', '/share/' + rideId);
+      } else if (path.startsWith('/share/')) {
+        const id = path.split('/share/')[1];
+        if (id) {
+          localStorage.setItem('pending_ride_id', id);
+        }
+      }
+    });
   </script>
 </head>
 <body>
