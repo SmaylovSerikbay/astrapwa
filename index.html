@@ -19,6 +19,19 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Сервис поиска попутчиков и такси">
+  
+  <!-- Open Graph / Facebook / Telegram Preview -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Astra - Поездка" />
+  <meta property="og:description" content="Забронируйте место в поездке" />
+  <meta property="og:image" content="https://astra.avr-group.kz/icons/Icon-512.png" />
+  <meta property="og:url" content="https://astra.avr-group.kz/" />
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Astra - Поездка" />
+  <meta name="twitter:description" content="Забронируйте место в поездке" />
+  <meta name="twitter:image" content="https://astra.avr-group.kz/icons/Icon-512.png" />
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -75,16 +88,18 @@
       const rideId = urlParams.get('ride');
       const path = window.location.pathname;
       
-      // Обработка /share/:id или ?ride=:id
+      // Обработка ?ride=:id (приоритет) или /share/:id
       if (rideId) {
         // Сохраняем ID поездки для использования после загрузки приложения
-        localStorage.setItem('pending_ride_id', rideId);
-        // Обновляем URL для чистоты
-        window.history.replaceState({}, '', '/share/' + rideId);
+        localStorage.setItem('pending_share_ride_id', rideId);
+        // Очищаем URL для чистоты (убираем параметры из адресной строки)
+        window.history.replaceState({}, '', window.location.pathname);
       } else if (path.startsWith('/share/')) {
         const id = path.split('/share/')[1];
         if (id) {
-          localStorage.setItem('pending_ride_id', id);
+          localStorage.setItem('pending_share_ride_id', id);
+          // Очищаем URL
+          window.history.replaceState({}, '', '/');
         }
       }
     });
