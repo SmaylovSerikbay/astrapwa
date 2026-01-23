@@ -48,6 +48,27 @@
   <!-- Подключаем скрипт Telegram Web App -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
+    // Функция для шаринга через Telegram WebApp SDK
+    function telegramShare(url, text) {
+      // Этот метод открывает нативное окно пересылки Telegram
+      if (window.Telegram && window.Telegram.WebApp) {
+        const fullUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+        window.Telegram.WebApp.openTelegramLink(fullUrl);
+      } else {
+        // Если открыто не в телеге, пробуем системное меню
+        if (navigator.share) {
+          navigator.share({ title: 'Astra Taxi', text: text, url: url }).catch(function(error) {
+            console.log('Ошибка при шаринге:', error);
+          });
+        } else {
+          // Fallback: копируем в буфер обмена
+          navigator.clipboard.writeText(text + '\n' + url).then(function() {
+            console.log('Скопировано в буфер обмена');
+          });
+        }
+      }
+    }
+
     // Блокируем системную кнопку "назад" в PWA
     window.addEventListener('popstate', function(event) {
       // Предотвращаем закрытие PWA при нажатии кнопки "назад"
